@@ -6,7 +6,7 @@ const createUser = async(req, res)=>{
 
     try { 
         const user = await User.create(req.body); 
-    res.status(201).json({
+          res.status(201).json({
         succeded:true,
         user, 
     });
@@ -40,10 +40,12 @@ const loginUser = async(req, res)=>{
 
         if(same) { //user varsa ve şifrelerde eşleşiyorsa
 
-            res.status(200).json({
-                user,
-                token:createToken(user._id),  // o an giriş yapan kullanıcının id'si alınır kontrol edilmek için
-            }) ;
+          const token =  createToken(user._id) // token oluştur / // o an giriş yapan kullanıcının id'si alınır kontrol edilmek için
+          res.cookie("jwt", token, {  // token jwt olarak cookiye kaydediliyor
+            httpOnly:true, // FE tarafından istek alınabilir
+            maxAge:1000*60*60*24,
+          });
+            res.redirect("/users/dashboard"); // giriş yaptıktan sonra yönlendir.
         }else {
             res.status(401).json({
                 succeded:false,
@@ -63,4 +65,10 @@ const createToken = (userId) => {
         expiresIn: "1d",
     });
 };
-export {createUser, loginUser};
+const getDashboardPage=(req, res)=>{
+    res.render("dashboard", {
+        link:"dashboard",
+    });
+};
+
+export {createUser, loginUser, getDashboardPage}; 
