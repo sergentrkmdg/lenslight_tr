@@ -4,16 +4,28 @@ import jwt from "jsonwebtoken";
 
 const createUser = async(req, res)=>{
 
-    try { 
-        const user = await User.create(req.body); 
-          res.redirect("/login");  // kullanıcı oluşturulduğunda login sayfasına yönlendirilsin
+    try {  
+        const user = await User.create(req.body);   
+        res.status(201).json({user:user._id});  
+        
+        //res.redirect("/login");  // kullanıcı oluşturulduğunda login sayfasına yönlendirir
         
     } catch (error) {
-        res.status(500).json({
-            succeded:false,
-            error,
-        });
-    }    
+        
+        let errors2 = {};
+
+        if(error.code === 11000) {
+            errors2.email="The Email is already register"
+        }
+
+        if(error.name === "ValidationError"){
+            Object.keys(error.errors).forEach((key) => {
+                errors2[key]=error.errors[key].message;
+            });
+        }
+        console.log("ERRORS2:::", errors2);
+        res.status(400).json(errors2);
+    }
 };
 const loginUser = async(req, res)=>{
 
