@@ -77,6 +77,10 @@ const createToken = (userId) => {
 };
 const getDashboardPage= async (req, res)=>{
     const photos = await Photo.find({user:res.locals.user._id});
+    const user = await User.findById({_id:res.locals.user._id}).populate([
+        "followings",
+        "follower"
+    ]);
     res.render("dashboard", {
         link:"dashboard",
         photos,
@@ -99,7 +103,7 @@ const getAllUsers = async (req, res) =>{
 const getAUser = async (req, res) =>{
     try {
         const user = await User.findById({_id:req.params.id}); // urlde ki id almamamızı sağlar
-        const photos = await Photo.find({user:res.locals.user._id}); // user o an giriş yapan kullaınıcı id'si olacak
+        const photos = await Photo.find({user:user._id}); // tıklanan userin fotoları olacak
         res.status(200).render("user", {
             user,
             photos,
@@ -112,6 +116,54 @@ const getAUser = async (req, res) =>{
         });
     }
 };
+const follow = async (req, res) =>{
+    try {
+      let user= await User.findByIdAndUpdate(  //takip edeceğim ya da takipten çıkacağım kullanıcı
+      {_id:req.params.id}, 
+      {$push:{followers:res.locals.user._id}}, // followers alanına o an ki kullanıcıyı ekle
+      {new:true} // ekledikten sonra yeni useri dön
+      );
+        user = await User.findByIdAndUpdate (
+        {_id:res.locals.user._id},
+        {$push:{following:req.params.id}}, 
+        {new:true}
+        );
+        res.status(200).json({
+            succeded:true,
+            user,
+        });
 
+    } catch (error) {
+        res.status(500).json({
+            succeded:false,
+            error,
+        });
+    }
+};
 
-export {createUser, loginUser, getDashboardPage, getAllUsers, getAUser}; 
+const unfollow = async (req, res) =>{
+    try {
+      let user= await User.findByIdAndUpdate(  //takip edeceğim ya da takipten çıkacağım kullanıcı
+      {_id:req.params.id}, 
+      {$pull:{followers:res.locals.user._id}}, // followers alanına o an ki kullanıcıyı ekle
+      {new:true} // ekledikten sonra yeni useri dön
+      );
+        user = await User.findByIdAndUpdate (
+        {_id:res.locals.user._id},
+        {$pull:{following:req.params.id}}, 
+        {new:true}
+        );
+        res.status(200).json({
+                succeded:true,
+                user,
+            });
+
+    } catch (error) {
+        res.status(500).json({
+            succeded:false,
+            error,
+        });
+    }
+};
+
+export {createUser, loginUser, getDashboardPage, getAllUsers, getAUser, follow, unfollow}; 
