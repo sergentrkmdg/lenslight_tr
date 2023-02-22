@@ -17,10 +17,11 @@ const createPhoto = async(req, res)=>{
         description:req.body.description,
         user:res.locals.user._id,
         url:result.secure_url,
+        image_id:result.public_id,
 
     });
      
-    fs.linkSync(req.files.image.tempFilePath);
+    fs.unlinkSync(req.files.image.tempFilePath);
     res.status(201).redirect("/users/dashboard"); 
     } catch (error) {
         res.status(500).json({
@@ -46,6 +47,7 @@ const getAllPhotos = async (req, res) =>{
         });
     }
 };
+
 const getAPhoto = async (req, res) =>{
     try {
         const photo = await Photo.findById({_id:req.params.id}).populate("user"); // photo üzerinden usera gidilebilir
@@ -60,5 +62,20 @@ const getAPhoto = async (req, res) =>{
         });
     }
 };
+const deletePhoto = async (req, res) =>{
+    try {
+        const photo = await Photo.findById(req.params.id); // foto seçildi
+        const photoId = photo.image_id;  // image_id propertiesi alındı
 
-export {createPhoto, getAllPhotos, getAPhoto};
+        await cloudinary.uploader.destroy(photoId); // cloudinaryden foto silindi
+        await Photo.findOneAndRemove({_id:req.params.id});
+        res.status(200).redirect("users/dashboard");
+
+    } catch (error) {
+        res.status(500).json({
+            succeded:false,
+            error,
+        });
+    }
+};
+export {createPhoto, getAllPhotos, getAPhoto, deletePhoto};

@@ -25,6 +25,10 @@ const photoSchema = new Schema({
         type:String,
         required:true,
     },
+    image_id:{
+        type:String,
+
+    },
 });
 
 const Photo = mongoose.model("Photo", photoSchema);
