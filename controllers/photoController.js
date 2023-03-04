@@ -51,9 +51,17 @@ const getAllPhotos = async (req, res) =>{
 const getAPhoto = async (req, res) =>{
     try {
         const photo = await Photo.findById({_id:req.params.id}).populate("user"); // photo üzerinden usera gidilebilir
+        
+        let isOwner = false;
+
+        if(res.locals.user) {
+        isOwner = photo.user.equals(res.locals.user._id); // giriş yapan kullanıcı foto sahibiyle aynıysa true döner
+        }
+        
         res.status(200).render("photo", {
             photo,
             link:"photos",
+            isOwner,
         });
     } catch (error) {
         res.status(500).json({
