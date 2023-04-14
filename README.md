@@ -1,4 +1,4 @@
-# lenslight_tr
+# lenslight_tr ( Node.JS )
 Youtube lengslith_tr projesi üzerinden eğitimi tamamladık.Eğitimde ki konu başlıkları:
 Node.JS
 Node.JS CRUD İşlemleri
